@@ -5,6 +5,9 @@
 #include <Arduino.h>
 #include <analogWrite.h>
 
+#include <Adafruit_NeoPixel.h>
+
+
 //This is a test to see how github branches work for arduino
 
 
@@ -171,6 +174,38 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
         analogWrite(lightPin, LOW);
       }
     }
+
+    
+
+    void RingLight(uint8_t inputL, uint8_t inputR){
+      int ringArray[] = {};
+      
+      if (inputL >= 0x7F){
+        int newValueL = (inputL - 127) *2;
+        int numberOfLights = int(newValueL * 0,03);
+        for(int i = 0; i < numberOfLights; i++){
+          //pixel.color(i, green)
+        }
+        
+      }
+      else{
+        int newValueL = (inputL -127) * (-2);
+        
+      }
+
+      if (inputR >= 0x7F){
+        int newValueR = (inputR - 127) *2;
+        
+      }
+      else{
+        int newValueR = (inputR - 127) * (-2);
+       
+      }
+      
+    }
+
+
+    
     
     void onWrite(BLECharacteristic *pCharWriteState) {
       Serial.println("Receiving Data");
@@ -185,6 +220,8 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
         horn(inputValues[2]);
 
         light(inputValues[3]);
+
+        RingLight(inputValues[0], inputValues[1]);
         
         
         //analogWrite(right, inputValues[1]);
