@@ -7,10 +7,14 @@
 
 #include <Adafruit_NeoPixel.h>
 
+#define N_LEDS 16
+#define PIN 10
+
+Adafruit_NeoPixel ringlight = Adafruit_NeoPixel(N_LEDS, PIN, NEO_GRB + NEO_KHZ800);
 
 //This is a test to see how github branches work for arduino
 
-
+//KnightRider Branch
 
 
 
@@ -235,6 +239,8 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
       
     }
 
+    
+
     void RingLight(uint8_t inputL, uint8_t inputR){
   
       if (inputL >= 0x7F){
@@ -242,14 +248,13 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
         int numberOfLeds = getLedNumber(newValueL);
         if(numberOfLeds <= 0){
           for (int i = 8; i < 17; i++) {
-           // pixel.set(i, 0000);
+            ringlight.setPixelColor(i, 0,0,0);
           }
-          
         }
         else{
-          for(int i = 0; i < numberOfLeds; i++){
-            //pixels.set(17-i, green);
-            //pixels.set(i, green);
+          for(int i = 1; i < numberOfLeds; i++){
+            ringlight.setPixelColor(17-i, 0, 255, 0);
+            
           }
         }
         
@@ -259,18 +264,46 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
         int newValueL = (inputL -127) * (-2);
         int numberOfLeds = getLedNumber(newValueL);
         if(numberOfLeds <= 0){
-          
-          return;
+          for(int i = 8; i < 17; i++) {
+            ringlight.setPixelColor(i, 0, 0, 0);
+          }
         }
-        for(int i = 0; )
+        else{
+          for(int i = 8; i < numberOfLeds; i ++){
+            ringlight.setPixelColor(i, 255, 0, 0);
+          }
+        }
+        
       }
 
       if (inputR >= 0x7F){
         int newValueR = (inputR - 127) *2;
+        int numberOfLeds = getLedNumber(newValueR);
+        if (numberOfLeds <= 0){
+          for(int i = 0; i < 8; i++) {
+            ringlight.setPixelColor(i, 0, 0, 0);
+          }
+        }
+        else{
+          for (int i = 0; i < numberOfLeds; i++){
+            ringlight.setPixelColor(i, 0, 255, 0);
+          }
+        }
         
       }
-      else{
+      else if (inputR < 0x7F){
         int newValueR = (inputR - 127) * (-2);
+        int numberOfLeds = getLedNumber(newValueR);
+        if (numberOfLeds <= 0) {
+          for(int i = 0; i < numberOfLeds; i++) {
+            ringlight.setPixelColor(i, 0, 0, 0);
+          }
+        }
+        else{
+          for(int i = 0; i < numberOfLeds; i++){
+            ringlight.setPixelColor(8-i, 255, 0, 0);
+          }
+        }
        
       }
       
@@ -318,6 +351,7 @@ void intro(){
 
 void setup(){
   idlePulsing(true);
+  ringlight.begin();
   Serial.begin(115200);
   Serial.println("Begin Setup BLE Service and Characteristics");
 
