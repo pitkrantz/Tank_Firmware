@@ -14,7 +14,7 @@ Adafruit_NeoPixel ringlight = Adafruit_NeoPixel(N_LEDS, PIN, NEO_GRB + NEO_KHZ80
 
 //This is a test to see how github branches work for arduino
 
-//KnightRider Branch
+//KnightRider Branch, yes
 
 
 
