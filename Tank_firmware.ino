@@ -175,22 +175,94 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
       }
     }
 
-    
+
+
+        //int numberOfLights = int(newValueL * 0,03);
+        //for(int i = 0; i < numberOfLights; i++){
+          //pixel.color(i, green)
+        //}
+
+    //optimisation einfach en domain vun 0-255/8 etc fir net emmer mussen ze rechnen
+    // 0-31, 32-63, 64 - 95, 96-127, 128-159, 160-191, 192-223, 224-255
+
+
+    int getLedNumber(int value){
+
+      if (0<value<=31){
+        Serial.println("1 LED");
+        return 1;
+      }
+
+      else if (32<=value<=63){
+        Serial.println("2 LED");
+        return 1;
+      }
+      
+      else if (64<=value<=95){
+        Serial.println("3 LED");
+        return 1;
+      }
+      
+      else if (96<=value<=127){
+        Serial.println("4 LED");
+        return 1;
+      }
+      
+      else if (128<=value<=159){
+        Serial.println("5 LED");
+        return 1;
+      }
+      
+      else if (160<=value<=191){
+        Serial.println("6 LED");
+        return 1;
+      }
+      
+      else if (192<=value<=223){
+        Serial.println("7 LED");
+        return 1;
+      }
+      
+      else if (224<=value<=255){
+        Serial.println("8 LED");
+        return 1;
+      }
+
+      else{
+        Serial.println("0 LED");
+        return 0;
+      }
+      
+    }
 
     void RingLight(uint8_t inputL, uint8_t inputR){
-      int ringArray[] = {};
-      
+  
       if (inputL >= 0x7F){
         int newValueL = (inputL - 127) *2;
-        int numberOfLights = int(newValueL * 0,03);
-        for(int i = 0; i < numberOfLights; i++){
-          //pixel.color(i, green)
+        int numberOfLeds = getLedNumber(newValueL);
+        if(numberOfLeds <= 0){
+          for (int i = 8; i < 17; i++) {
+           // pixel.set(i, 0000);
+          }
+          
+        }
+        else{
+          for(int i = 0; i < numberOfLeds; i++){
+            //pixels.set(17-i, green);
+            //pixels.set(i, green);
+          }
         }
         
-      }
-      else{
-        int newValueL = (inputL -127) * (-2);
         
+      }
+      else if (inputL < 0x7F){
+        int newValueL = (inputL -127) * (-2);
+        int numberOfLeds = getLedNumber(newValueL);
+        if(numberOfLeds <= 0){
+          
+          return;
+        }
+        for(int i = 0; )
       }
 
       if (inputR >= 0x7F){
