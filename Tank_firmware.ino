@@ -313,7 +313,7 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
         
         horn(inputValues[2]);
 
-        light(inputValues[3]);
+        //light(inputValues[3]);
 
         RingLight(inputValues[0], inputValues[1]);
         
