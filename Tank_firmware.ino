@@ -191,35 +191,35 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
 
     int getLedNumber(int value){
 
-      if (0<value<=31){
+      if (0<value && value<=31){
         return 1;
       }
 
-      else if (32<=value<=63){
+      if (32<=value && value<=63){
         return 1;
       }
       
-      else if (64<=value<=95){
+      if (64<=value && value<=95){
         return 1;
       }
       
-      else if (96<=value<=127){
+      if (96<=value && value<=127){
         return 1;
       }
       
-      else if (128<=value<=159){
+      if (128<=value && value<=159){
         return 1;
       }
       
-      else if (160<=value<=191){
+      if (160<=value && value<=191){
         return 1;
       }
       
-      else if (192<=value<=223){
+      if (192<=value && value<=223){
         return 1;
       }
       
-      else if (224<=value<=255){
+      if (224<=value && value<=255){
         return 1;
       }
 
@@ -315,7 +315,7 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
 
         //light(inputValues[3]);
 
-        RingLight(inputValues[0], inputValues[1]);
+        //RingLight(inputValues[0], inputValues[1]);
         
         
         //analogWrite(right, inputValues[1]);
