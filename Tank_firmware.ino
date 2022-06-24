@@ -180,6 +180,11 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
     }
 
 
+    void knightRider(){
+      §
+    }
+
+
 
         //int numberOfLights = int(newValueL * 0,03);
         //for(int i = 0; i < numberOfLights; i++){
