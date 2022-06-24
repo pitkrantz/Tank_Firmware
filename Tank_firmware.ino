@@ -7,9 +7,12 @@
 
 #include <Adafruit_NeoPixel.h>
 
+#define LEDPIN  22
+#define N_LEDS  16
+
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(N_LEDS, LEDPIN, NEO_GRB + NEO_KHZ800);
 
 //This is a test to see how github branches work for arduino
-
 
 
 
@@ -189,47 +192,38 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
     int getLedNumber(int value){
 
       if (0<value<=31){
-        Serial.println("1 LED");
         return 1;
       }
 
       else if (32<=value<=63){
-        Serial.println("2 LED");
         return 1;
       }
       
       else if (64<=value<=95){
-        Serial.println("3 LED");
         return 1;
       }
       
       else if (96<=value<=127){
-        Serial.println("4 LED");
         return 1;
       }
       
       else if (128<=value<=159){
-        Serial.println("5 LED");
         return 1;
       }
       
       else if (160<=value<=191){
-        Serial.println("6 LED");
         return 1;
       }
       
       else if (192<=value<=223){
-        Serial.println("7 LED");
         return 1;
       }
       
       else if (224<=value<=255){
-        Serial.println("8 LED");
         return 1;
       }
 
       else{
-        Serial.println("0 LED");
         return 0;
       }
       
@@ -241,37 +235,65 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
         int newValueL = (inputL - 127) *2;
         int numberOfLeds = getLedNumber(newValueL);
         if(numberOfLeds <= 0){
-          for (int i = 8; i < 17; i++) {
-           // pixel.set(i, 0000);
+          for (int i = 8; i < 16; i++) {
+            pixels.setPixelColor(i, 0, 0, 0);
+          }
+          
+        }
+        else {
+          for(int i = 16; i > numberOfLeds; i - 1){
+            pixels.setPixelColor(i, 0, 255, 0);
+          }
+        }
+
+      }
+      
+      if (inputL < 0x7F){
+        int newValueL = (inputL -127) * (-2);
+        int numberOfLeds = getLedNumber(newValueL);
+        if(numberOfLeds <= 0){
+          for(int i = 8; i < 16; i++){
+            pixels.setPixelColor(i, 0, 0, 0);
           }
           
         }
         else{
-          for(int i = 0; i < numberOfLeds; i++){
-            //pixels.set(17-i, green);
-            //pixels.set(i, green);
+          for(int i = 8; i < numberOfLeds; i++){
+            pixels.setPixelColor(i, 255, 0, 0);
           }
         }
-        
-        
-      }
-      else if (inputL < 0x7F){
-        int newValueL = (inputL -127) * (-2);
-        int numberOfLeds = getLedNumber(newValueL);
-        if(numberOfLeds <= 0){
-          
-          return;
-        }
-        for(int i = 0; )
       }
 
       if (inputR >= 0x7F){
         int newValueR = (inputR - 127) *2;
+        int numberOfLeds = getLedNumber(newValueR);
+        if(numberOfLeds <= 0){
+          for(int i = 0; i < 8; i++){
+            pixels.setPixelColor(i, 0, 0, 0);
+          }
+        }
+        else{
+          for(int i = 0; i < numberOfLeds; i++){
+            pixels.setPixelColor(i, 0, 255, 0);
+          }
+        }
         
       }
-      else{
+      else if (inputR < 0x7F){
         int newValueR = (inputR - 127) * (-2);
-       
+        int numberOfLeds = getLedNumber(newValueR);
+        if(numberOfLeds <= 0){
+          for(int i = 0; i < 8; i++){
+            pixels.setPixelColor(i, 0, 0, 0);
+          }
+        }
+        
+        else{
+          for(int i = 8; i > numberOfLeds; i - 1){
+            pixels.setPixelColor(i, 255, 0, 0);
+          }
+        }
+        
       }
       
     }
@@ -317,6 +339,10 @@ void intro(){
 }
 
 void setup(){
+
+  pixels.begin();
+
+  
   idlePulsing(true);
   Serial.begin(115200);
   Serial.println("Begin Setup BLE Service and Characteristics");
