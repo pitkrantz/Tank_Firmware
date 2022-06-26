@@ -196,31 +196,31 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
       }
 
       if (32<=value && value<=63){
-        return 1;
+        return 2;
       }
       
       if (64<=value && value<=95){
-        return 1;
+        return 3;
       }
       
       if (96<=value && value<=127){
-        return 1;
+        return 4;
       }
       
       if (128<=value && value<=159){
-        return 1;
+        return 5;
       }
       
       if (160<=value && value<=191){
-        return 1;
+        return 6;
       }
       
       if (192<=value && value<=223){
-        return 1;
+        return 7;
       }
       
       if (224<=value && value<=255){
-        return 1;
+        return 8;
       }
 
       else{
@@ -234,16 +234,18 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
       if (inputL >= 0x7F){
         int newValueL = (inputL - 127) *2;
         int numberOfLeds = getLedNumber(newValueL);
-        if(numberOfLeds <= 0){
+        if(numberOfLeds = 0){
           for (int i = 8; i < 16; i++) {
             pixels.setPixelColor(i, 0, 0, 0);
           }
+          pixels.show();
           
         }
         else {
-          for(int i = 16; i > numberOfLeds; i - 1){
+          for(int i = 0; i < numberOfLeds; i++){
             pixels.setPixelColor(i, 0, 255, 0);
           }
+          pixels.show();
         }
 
       }
@@ -251,47 +253,52 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
       if (inputL < 0x7F){
         int newValueL = (inputL -127) * (-2);
         int numberOfLeds = getLedNumber(newValueL);
-        if(numberOfLeds <= 0){
-          for(int i = 8; i < 16; i++){
+        if(numberOfLeds = 0){
+          for(int i = 0; i < 8; i++){
             pixels.setPixelColor(i, 0, 0, 0);
           }
-          
+          pixels.show();
         }
         else{
-          for(int i = 8; i < numberOfLeds; i++){
+          for(int i = 8 - numberOfLeds; i < 8; i++){
             pixels.setPixelColor(i, 255, 0, 0);
           }
+          pixels.show();
         }
       }
 
       if (inputR >= 0x7F){
         int newValueR = (inputR - 127) *2;
         int numberOfLeds = getLedNumber(newValueR);
-        if(numberOfLeds <= 0){
-          for(int i = 0; i < 8; i++){
+        if(numberOfLeds = 0){
+          for(int i = 9; i < 16; i++){
             pixels.setPixelColor(i, 0, 0, 0);
           }
+          pixels.show();
         }
         else{
-          for(int i = 0; i < numberOfLeds; i++){
+          for(int i = 16 - numberOfLeds; i < 16; i++){
             pixels.setPixelColor(i, 0, 255, 0);
           }
+          pixels.show();
         }
         
       }
       else if (inputR < 0x7F){
         int newValueR = (inputR - 127) * (-2);
         int numberOfLeds = getLedNumber(newValueR);
-        if(numberOfLeds <= 0){
-          for(int i = 0; i < 8; i++){
+        if(numberOfLeds = 0){
+          for(int i = 9; i < 16; i++){
             pixels.setPixelColor(i, 0, 0, 0);
           }
+          pixels.show();
         }
         
         else{
-          for(int i = 8; i > numberOfLeds; i - 1){
+          for(int i = 9; i < 9 + numberOfLeds; i++){
             pixels.setPixelColor(i, 255, 0, 0);
           }
+          pixels.show();
         }
         
       }
@@ -315,7 +322,7 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
 
         //light(inputValues[3]);
 
-        //RingLight(inputValues[0], inputValues[1]);
+        RingLight(inputValues[0], inputValues[1]);
         
         
         //analogWrite(right, inputValues[1]);
