@@ -280,16 +280,25 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
     void LeftLight(uint8_t inputL){
       int numLeds = getLedNumber(inputL);
       if (numLeds == 0){
-        return;
+        for(int i = 0; i < 8; i++){
+          pixels.setPixelColor(i, 0, 0, 0);
+        }
       }
       if (inputL > 127){
         for(int i = 0; i < numLeds; i++){
           pixels.setPixelColor(i, 0, 255, 0);
         }
+        for(int i = numLeds + 1; i < 8; i++){
+          pixels.setPixelColor(i, 0, 0, 0);
+        }
+        
       }
       if (inputL < 127) {
         for(int i = 8 - numLeds; i < 8; i++){
           pixels.setPixelColor(i, 255, 0, 0);
+        }
+        for(int i = 0; i < 8 - numLeds; i++){
+          pixels.setPixelColor(i, 0, 0, 0);
         }
       }
     
@@ -299,31 +308,30 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
     void RightLight(uint8_t inputR){
       int numLeds = getLedNumber(inputR);
       if (numLeds == 0){
-        return;
+        for(int i = 8; i < 16; i++){
+          pixels.setPixelColor(i, 0, 0, 0);
+        }
       }
       if (inputR > 127){
         for(int i = 16 - numLeds; i < 16; i++){
           pixels.setPixelColor(i, 0, 255, 0);
+        }
+        for(int i = 8; i < 16 - numLeds; i++){
+          pixels.setPixelColor(i, 0, 0, 0);
         }
       }
       if (inputR < 127) {
         for(int i = 8; i < 8 + numLeds; i++){
           pixels.setPixelColor(i, 255, 0, 0);
         }
+        for(int i = 8 + numLeds; i < 16; i++){
+          pixels.setPixelColor(i, 0, 0, 0);
+        }
       }
     
       pixels.show();
-    }
+    }  
 
-    void reset(){
-      for(int i = 0; i < 16; i++){
-        pixels.setPixelColor(i, 0, 0, 0);
-      }
-      pixels.show();
-    }
-
-
-    
     
     void onWrite(BLECharacteristic *pCharWriteState) {
       Serial.println("Receiving Data");
@@ -338,7 +346,7 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
         horn(inputValues[2]);
 
         //light(inputValues[3]);
-        reset();
+
         LeftLight(inputValues[0]);
         RightLight(inputValues[1]);
 
