@@ -7,7 +7,7 @@
 
 #include <Adafruit_NeoPixel.h>
 
-#define LEDPIN  22
+#define LEDPIN  27
 #define N_LEDS  16
 
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(N_LEDS, LEDPIN, NEO_GRB + NEO_KHZ800);
@@ -124,6 +124,7 @@ class ServerCallbacks: public BLEServerCallbacks{
 };
 
 class InputReceivedCallbacks: public BLECharacteristicCallbacks {
+  
     void leftMotor(uint8_t input){
       if (input >= 0x7F){
         digitalWrite(leftpos, HIGH);
@@ -190,119 +191,135 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
 
 
     int getLedNumber(int value){
-
-      if (0<value && value<=31){
-        return 1;
-      }
-
-      if (32<=value && value<=63){
-        return 2;
+      if(0<= value && value < 16){
+        Serial.println("8");
+        return 8;
       }
       
-      if (64<=value && value<=95){
-        return 3;
-      }
-      
-      if (96<=value && value<=127){
-        return 4;
-      }
-      
-      if (128<=value && value<=159){
-        return 5;
-      }
-      
-      if (160<=value && value<=191){
-        return 6;
-      }
-      
-      if (192<=value && value<=223){
+      if(16<= value && value < 32){
+        Serial.println("7");
         return 7;
       }
       
-      if (224<=value && value<=255){
-        return 8;
+      if(32<= value && value < 48){
+        Serial.println("6");
+        return 6;
+      }
+      
+      if(48<= value && value < 64){
+        Serial.println("5");
+        return 5;
+      }
+      
+      if(64<= value && value < 80){
+        Serial.println("4");
+        return 4;
+      }
+      
+      if(80<= value && value < 96){
+        Serial.println("3");
+        return 3;
       }
 
-      else{
+      if(96<= value && value < 112){
+        Serial.println("2");
+        return 2;
+      }
+
+      if(112<= value && value < 127){
+        Serial.println("1");
+        return 1;
+      }
+
+      if(value == 127){
+        Serial.println("zerro");
         return 0;
       }
-      
+
+      if(127< value && value < 144){
+        Serial.println("1");
+        return 1;
+      }
+
+      if(144<= value && value < 160){
+        Serial.println("2");
+        return 2;
+      }
+
+      if(160<= value && value < 176){
+        Serial.println("3");
+        return 3;
+      }
+
+      if(176<= value && value < 192){
+        Serial.println("4");
+        return 4;
+      }
+
+      if(192<= value && value < 208){
+        Serial.println("5");
+        return 5;
+      }
+
+      if(208<= value && value < 224){
+        Serial.println("6");
+        return 6;
+      }
+
+      if(224<= value && value < 240){
+        Serial.println("7");
+        return 7;
+      }
+
+      if(240<= value && value <= 255){
+        Serial.println("8");
+        return 8;
+      }
     }
 
-    void RingLight(uint8_t inputL, uint8_t inputR){
-  
-      if (inputL >= 0x7F){
-        int newValueL = (inputL - 127) *2;
-        int numberOfLeds = getLedNumber(newValueL);
-        if(numberOfLeds = 0){
-          for (int i = 8; i < 16; i++) {
-            pixels.setPixelColor(i, 0, 0, 0);
-          }
-          pixels.show();
-          
+    void LeftLight(uint8_t inputL){
+      int numLeds = getLedNumber(inputL);
+      if (numLeds == 0){
+        return;
+      }
+      if (inputL > 127){
+        for(int i = 0; i < numLeds; i++){
+          pixels.setPixelColor(i, 0, 255, 0);
         }
-        else {
-          for(int i = 0; i < numberOfLeds; i++){
-            pixels.setPixelColor(i, 0, 255, 0);
-          }
-          pixels.show();
+      }
+      if (inputL < 127) {
+        for(int i = 8 - numLeds; i < 8; i++){
+          pixels.setPixelColor(i, 255, 0, 0);
         }
+      }
+    
+      pixels.show();
+    }
 
+    void RightLight(uint8_t inputR){
+      int numLeds = getLedNumber(inputR);
+      if (numLeds == 0){
+        return;
       }
-      
-      if (inputL < 0x7F){
-        int newValueL = (inputL -127) * (-2);
-        int numberOfLeds = getLedNumber(newValueL);
-        if(numberOfLeds = 0){
-          for(int i = 0; i < 8; i++){
-            pixels.setPixelColor(i, 0, 0, 0);
-          }
-          pixels.show();
-        }
-        else{
-          for(int i = 8 - numberOfLeds; i < 8; i++){
-            pixels.setPixelColor(i, 255, 0, 0);
-          }
-          pixels.show();
+      if (inputR > 127){
+        for(int i = 16 - numLeds; i < 16; i++){
+          pixels.setPixelColor(i, 0, 255, 0);
         }
       }
+      if (inputR < 127) {
+        for(int i = 8; i < 8 + numLeds; i++){
+          pixels.setPixelColor(i, 255, 0, 0);
+        }
+      }
+    
+      pixels.show();
+    }
 
-      if (inputR >= 0x7F){
-        int newValueR = (inputR - 127) *2;
-        int numberOfLeds = getLedNumber(newValueR);
-        if(numberOfLeds = 0){
-          for(int i = 9; i < 16; i++){
-            pixels.setPixelColor(i, 0, 0, 0);
-          }
-          pixels.show();
-        }
-        else{
-          for(int i = 16 - numberOfLeds; i < 16; i++){
-            pixels.setPixelColor(i, 0, 255, 0);
-          }
-          pixels.show();
-        }
-        
+    void reset(){
+      for(int i = 0; i < 16; i++){
+        pixels.setPixelColor(i, 0, 0, 0);
       }
-      else if (inputR < 0x7F){
-        int newValueR = (inputR - 127) * (-2);
-        int numberOfLeds = getLedNumber(newValueR);
-        if(numberOfLeds = 0){
-          for(int i = 9; i < 16; i++){
-            pixels.setPixelColor(i, 0, 0, 0);
-          }
-          pixels.show();
-        }
-        
-        else{
-          for(int i = 9; i < 9 + numberOfLeds; i++){
-            pixels.setPixelColor(i, 255, 0, 0);
-          }
-          pixels.show();
-        }
-        
-      }
-      
+      pixels.show();
     }
 
 
@@ -321,8 +338,10 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
         horn(inputValues[2]);
 
         //light(inputValues[3]);
+        reset();
+        LeftLight(inputValues[0]);
+        RightLight(inputValues[1]);
 
-        RingLight(inputValues[0], inputValues[1]);
         
         
         //analogWrite(right, inputValues[1]);
