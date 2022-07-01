@@ -7,14 +7,13 @@
 
 #include <Adafruit_NeoPixel.h>
 
-#define N_LEDS 16
-#define PIN 10
+#define LEDPIN  27
+#define N_LEDS  16
 
-Adafruit_NeoPixel ringlight = Adafruit_NeoPixel(N_LEDS, PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(N_LEDS, LEDPIN, NEO_GRB + NEO_KHZ800);
 
 //This is a test to see how github branches work for arduino
-
-//KnightRider Branch, yes
+// Yes KnightRider
 
 
 
@@ -125,6 +124,7 @@ class ServerCallbacks: public BLEServerCallbacks{
 };
 
 class InputReceivedCallbacks: public BLECharacteristicCallbacks {
+  
     void leftMotor(uint8_t input){
       if (input >= 0x7F){
         digitalWrite(leftpos, HIGH);
@@ -180,11 +180,6 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
     }
 
 
-    void knightRider(){
-      §
-    }
-
-
 
         //int numberOfLights = int(newValueL * 0,03);
         //for(int i = 0; i < numberOfLights; i++){
@@ -196,126 +191,147 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
 
 
     int getLedNumber(int value){
-
-      if (0<value<=31){
-        Serial.println("1 LED");
-        return 1;
-      }
-
-      else if (32<=value<=63){
-        Serial.println("2 LED");
-        return 1;
+      if(0<= value && value < 16){
+        Serial.println("8");
+        return 8;
       }
       
-      else if (64<=value<=95){
-        Serial.println("3 LED");
-        return 1;
+      if(16<= value && value < 32){
+        Serial.println("7");
+        return 7;
       }
       
-      else if (96<=value<=127){
-        Serial.println("4 LED");
-        return 1;
+      if(32<= value && value < 48){
+        Serial.println("6");
+        return 6;
       }
       
-      else if (128<=value<=159){
-        Serial.println("5 LED");
-        return 1;
+      if(48<= value && value < 64){
+        Serial.println("5");
+        return 5;
       }
       
-      else if (160<=value<=191){
-        Serial.println("6 LED");
-        return 1;
+      if(64<= value && value < 80){
+        Serial.println("4");
+        return 4;
       }
       
-      else if (192<=value<=223){
-        Serial.println("7 LED");
-        return 1;
-      }
-      
-      else if (224<=value<=255){
-        Serial.println("8 LED");
-        return 1;
+      if(80<= value && value < 96){
+        Serial.println("3");
+        return 3;
       }
 
-      else{
-        Serial.println("0 LED");
+      if(96<= value && value < 112){
+        Serial.println("2");
+        return 2;
+      }
+
+      if(112<= value && value < 127){
+        Serial.println("1");
+        return 1;
+      }
+
+      if(value == 127){
+        Serial.println("zerro");
         return 0;
       }
-      
+
+      if(127< value && value < 144){
+        Serial.println("1");
+        return 1;
+      }
+
+      if(144<= value && value < 160){
+        Serial.println("2");
+        return 2;
+      }
+
+      if(160<= value && value < 176){
+        Serial.println("3");
+        return 3;
+      }
+
+      if(176<= value && value < 192){
+        Serial.println("4");
+        return 4;
+      }
+
+      if(192<= value && value < 208){
+        Serial.println("5");
+        return 5;
+      }
+
+      if(208<= value && value < 224){
+        Serial.println("6");
+        return 6;
+      }
+
+      if(224<= value && value < 240){
+        Serial.println("7");
+        return 7;
+      }
+
+      if(240<= value && value <= 255){
+        Serial.println("8");
+        return 8;
+      }
     }
 
+    void LeftLight(uint8_t inputL){
+      int numLeds = getLedNumber(inputL);
+      if (numLeds == 0){
+        for(int i = 0; i < 8; i++){
+          pixels.setPixelColor(i, 0, 0, 0);
+        }
+      }
+      if (inputL > 127){
+        for(int i = 0; i < numLeds; i++){
+          pixels.setPixelColor(i, 0, 255, 0);
+        }
+        for(int i = numLeds + 1; i < 8; i++){
+          pixels.setPixelColor(i, 0, 0, 0);
+        }
+        
+      }
+      if (inputL < 127) {
+        for(int i = 8 - numLeds; i < 8; i++){
+          pixels.setPixelColor(i, 255, 0, 0);
+        }
+        for(int i = 0; i < 8 - numLeds; i++){
+          pixels.setPixelColor(i, 0, 0, 0);
+        }
+      }
     
-
-    void RingLight(uint8_t inputL, uint8_t inputR){
-  
-      if (inputL >= 0x7F){
-        int newValueL = (inputL - 127) *2;
-        int numberOfLeds = getLedNumber(newValueL);
-        if(numberOfLeds <= 0){
-          for (int i = 8; i < 17; i++) {
-            ringlight.setPixelColor(i, 0,0,0);
-          }
-        }
-        else{
-          for(int i = 1; i < numberOfLeds; i++){
-            ringlight.setPixelColor(17-i, 0, 255, 0);
-            
-          }
-        }
-        
-        
-      }
-      else if (inputL < 0x7F){
-        int newValueL = (inputL -127) * (-2);
-        int numberOfLeds = getLedNumber(newValueL);
-        if(numberOfLeds <= 0){
-          for(int i = 8; i < 17; i++) {
-            ringlight.setPixelColor(i, 0, 0, 0);
-          }
-        }
-        else{
-          for(int i = 8; i < numberOfLeds; i ++){
-            ringlight.setPixelColor(i, 255, 0, 0);
-          }
-        }
-        
-      }
-
-      if (inputR >= 0x7F){
-        int newValueR = (inputR - 127) *2;
-        int numberOfLeds = getLedNumber(newValueR);
-        if (numberOfLeds <= 0){
-          for(int i = 0; i < 8; i++) {
-            ringlight.setPixelColor(i, 0, 0, 0);
-          }
-        }
-        else{
-          for (int i = 0; i < numberOfLeds; i++){
-            ringlight.setPixelColor(i, 0, 255, 0);
-          }
-        }
-        
-      }
-      else if (inputR < 0x7F){
-        int newValueR = (inputR - 127) * (-2);
-        int numberOfLeds = getLedNumber(newValueR);
-        if (numberOfLeds <= 0) {
-          for(int i = 0; i < numberOfLeds; i++) {
-            ringlight.setPixelColor(i, 0, 0, 0);
-          }
-        }
-        else{
-          for(int i = 0; i < numberOfLeds; i++){
-            ringlight.setPixelColor(8-i, 255, 0, 0);
-          }
-        }
-       
-      }
-      
+      pixels.show();
     }
 
-
+    void RightLight(uint8_t inputR){
+      int numLeds = getLedNumber(inputR);
+      if (numLeds == 0){
+        for(int i = 8; i < 16; i++){
+          pixels.setPixelColor(i, 0, 0, 0);
+        }
+      }
+      if (inputR > 127){
+        for(int i = 16 - numLeds; i < 16; i++){
+          pixels.setPixelColor(i, 0, 255, 0);
+        }
+        for(int i = 8; i < 16 - numLeds; i++){
+          pixels.setPixelColor(i, 0, 0, 0);
+        }
+      }
+      if (inputR < 127) {
+        for(int i = 8; i < 8 + numLeds; i++){
+          pixels.setPixelColor(i, 255, 0, 0);
+        }
+        for(int i = 8 + numLeds; i < 16; i++){
+          pixels.setPixelColor(i, 0, 0, 0);
+        }
+      }
     
+      pixels.show();
+    }  
+
     
     void onWrite(BLECharacteristic *pCharWriteState) {
       Serial.println("Receiving Data");
@@ -329,9 +345,11 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
         
         horn(inputValues[2]);
 
-        light(inputValues[3]);
+        //light(inputValues[3]);
 
-        RingLight(inputValues[0], inputValues[1]);
+        LeftLight(inputValues[0]);
+        RightLight(inputValues[1]);
+
         
         
         //analogWrite(right, inputValues[1]);
@@ -355,8 +373,11 @@ void intro(){
 }
 
 void setup(){
+
+  pixels.begin();
+
+  
   idlePulsing(true);
-  ringlight.begin();
   Serial.begin(115200);
   Serial.println("Begin Setup BLE Service and Characteristics");
 
