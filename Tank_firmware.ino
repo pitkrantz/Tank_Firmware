@@ -46,6 +46,22 @@ static uint8_t outputData[1];
 
 BLECharacteristic *pOutputChar;
 
+void knightRider(){
+  for(int i = 6; i < 12; i++){
+        pixels.setPixelColor(i, 20, 0, 0);
+        pixels.setPixelColor(i-2, 0, 0, 0);
+        pixels.show();
+        delay(80);
+      }
+      delay(80);
+      for(int i = 1; i < 6; i++){
+        pixels.setPixelColor(12-i, 0, 0, 0);
+        pixels.setPixelColor(12-i-2, 20, 0, 0);
+        pixels.show();
+        delay(80);
+      }
+}
+
 void ledblink(){
   for(byte i = 0; i < 0xFF; i++){
     analogWrite(statusLightPin, i);
@@ -286,7 +302,7 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
       }
       if (inputL > 127){
         for(int i = 0; i < numLeds; i++){
-          pixels.setPixelColor(i, 0, 255, 0);
+          pixels.setPixelColor(i, 0, 30, 0);
         }
         for(int i = numLeds + 1; i < 8; i++){
           pixels.setPixelColor(i, 0, 0, 0);
@@ -295,7 +311,7 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
       }
       if (inputL < 127) {
         for(int i = 8 - numLeds; i < 8; i++){
-          pixels.setPixelColor(i, 255, 0, 0);
+          pixels.setPixelColor(i, 30, 0, 0);
         }
         for(int i = 0; i < 8 - numLeds; i++){
           pixels.setPixelColor(i, 0, 0, 0);
@@ -314,7 +330,7 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
       }
       if (inputR > 127){
         for(int i = 16 - numLeds; i < 16; i++){
-          pixels.setPixelColor(i, 0, 255, 0);
+          pixels.setPixelColor(i, 0, 30, 0);
         }
         for(int i = 8; i < 16 - numLeds; i++){
           pixels.setPixelColor(i, 0, 0, 0);
@@ -322,7 +338,7 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
       }
       if (inputR < 127) {
         for(int i = 8; i < 8 + numLeds; i++){
-          pixels.setPixelColor(i, 255, 0, 0);
+          pixels.setPixelColor(i, 30, 0, 0);
         }
         for(int i = 8 + numLeds; i < 16; i++){
           pixels.setPixelColor(i, 0, 0, 0);
@@ -349,7 +365,6 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
 
         LeftLight(inputValues[0]);
         RightLight(inputValues[1]);
-
         
         
         //analogWrite(right, inputValues[1]);
