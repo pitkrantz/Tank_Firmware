@@ -13,7 +13,7 @@
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(N_LEDS, LEDPIN, NEO_GRB + NEO_KHZ800);
 
 //This is a test to see how github branches work for arduino
-
+//Bug Fixes Version
 
 
 
