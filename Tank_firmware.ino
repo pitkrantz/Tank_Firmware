@@ -40,6 +40,10 @@ int lightPin = 21;
 
 bool idleMode = true;
 
+int oldLedL = 0;
+int oldLedR = 0;
+
+
 //uint8_t Values[4] = {0x7F, 0x7F, 0x00, 0x00};
 
 static uint8_t outputData[1];
@@ -286,7 +290,7 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
       }
       if (inputL > 127){
         for(int i = 0; i < numLeds; i++){
-          pixels.setPixelColor(i, 0, 255, 0);
+          pixels.setPixelColor(i, 0, 10, 0);
         }
         for(int i = numLeds + 1; i < 8; i++){
           pixels.setPixelColor(i, 0, 0, 0);
@@ -295,14 +299,14 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
       }
       if (inputL < 127) {
         for(int i = 8 - numLeds; i < 8; i++){
-          pixels.setPixelColor(i, 255, 0, 0);
+          pixels.setPixelColor(i, 10, 0, 0);
         }
         for(int i = 0; i < 8 - numLeds; i++){
           pixels.setPixelColor(i, 0, 0, 0);
         }
       }
     
-      pixels.show();
+      //pixels.show();
     }
 
     void RightLight(uint8_t inputR){
@@ -314,7 +318,7 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
       }
       if (inputR > 127){
         for(int i = 16 - numLeds; i < 16; i++){
-          pixels.setPixelColor(i, 0, 255, 0);
+          pixels.setPixelColor(i, 0, 10, 0);
         }
         for(int i = 8; i < 16 - numLeds; i++){
           pixels.setPixelColor(i, 0, 0, 0);
@@ -322,14 +326,14 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
       }
       if (inputR < 127) {
         for(int i = 8; i < 8 + numLeds; i++){
-          pixels.setPixelColor(i, 255, 0, 0);
+          pixels.setPixelColor(i, 10, 0, 0);
         }
         for(int i = 8 + numLeds; i < 16; i++){
           pixels.setPixelColor(i, 0, 0, 0);
         }
       }
     
-      pixels.show();
+      //pixels.show();
     }  
 
     
@@ -347,10 +351,21 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
 
         //light(inputValues[3]);
 
-        LeftLight(inputValues[0]);
-        RightLight(inputValues[1]);
+        int currentLedL = getLedNumber(inputValues[0]);
+        int currentLedR = getLedNumber(inputValues[1]);
 
+        if(oldLedL != currentLedL){
+          LeftLight(inputValues[0]);
+        }
+  
+        if(oldLedR != currentLedR){
+           RightLight(inputValues[1]);
+        }
+
+        pixels.show();
         
+        oldLedL = currentLedL;
+        oldLedR = currentLedR;
         
         //analogWrite(right, inputValues[1]);
 
