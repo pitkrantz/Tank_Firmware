@@ -40,6 +40,8 @@ int lightPin = 21;
 
 bool idleMode = true;
 
+bool knightRiderMode = false;
+
 //uint8_t Values[4] = {0x7F, 0x7F, 0x00, 0x00};
 
 static uint8_t outputData[1];
@@ -67,19 +69,39 @@ void idlePulsing(bool idleMode){
   }
 }
 
+void knightRider(bool turbo){
+  if(turbo){
+    for(int i = 6; i < 12; i++){
+        pixels.setPixelColor(i, 20, 0, 0);
+        pixels.setPixelColor(i-2, 0, 0, 0);
+        pixels.show();
+        delay(80);
+      }
+      delay(80);
+      for(int i = 1; i < 6; i++){
+        pixels.setPixelColor(12-i, 0, 0, 0);
+        pixels.setPixelColor(12-i-2, 20, 0, 0);
+        pixels.show();
+        delay(80);
+      }
+  }
+
+  else{
+    return;
+  }
+   
+  
+}
+
 void Task2code( void * pvParameters ){
   Serial.print("Task2 running on core ");
   Serial.println(xPortGetCoreID());
-
   for(;;){
-    if(!idleMode) {
-      analogWrite(statusLightPin, 0);
+    if(knightRiderMode){
+      knightRider(true);
     }
     else{
-      for(byte i = 0; i < 0xFF; i++){
-        analogWrite(statusLightPin, i);
-        delay(5);
-      }
+      knightRider(false);
     }
   }
 }
@@ -286,7 +308,7 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
       }
       if (inputL > 127){
         for(int i = 0; i < numLeds; i++){
-          pixels.setPixelColor(i, 0, 255, 0);
+          pixels.setPixelColor(i, 0, 20, 0);
         }
         for(int i = numLeds + 1; i < 8; i++){
           pixels.setPixelColor(i, 0, 0, 0);
@@ -295,7 +317,7 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
       }
       if (inputL < 127) {
         for(int i = 8 - numLeds; i < 8; i++){
-          pixels.setPixelColor(i, 255, 0, 0);
+          pixels.setPixelColor(i, 20, 0, 0);
         }
         for(int i = 0; i < 8 - numLeds; i++){
           pixels.setPixelColor(i, 0, 0, 0);
@@ -314,7 +336,7 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
       }
       if (inputR > 127){
         for(int i = 16 - numLeds; i < 16; i++){
-          pixels.setPixelColor(i, 0, 255, 0);
+          pixels.setPixelColor(i, 0, 20, 0);
         }
         for(int i = 8; i < 16 - numLeds; i++){
           pixels.setPixelColor(i, 0, 0, 0);
@@ -322,7 +344,7 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
       }
       if (inputR < 127) {
         for(int i = 8; i < 8 + numLeds; i++){
-          pixels.setPixelColor(i, 255, 0, 0);
+          pixels.setPixelColor(i, 20, 0, 0);
         }
         for(int i = 8 + numLeds; i < 16; i++){
           pixels.setPixelColor(i, 0, 0, 0);
@@ -343,15 +365,18 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
         leftMotor(inputValues[0]);
         rightMotor(inputValues[1]);
         
-        horn(inputValues[2]);
+        //horn(inputValues[2]);
 
         //light(inputValues[3]);
 
-        LeftLight(inputValues[0]);
-        RightLight(inputValues[1]);
-
-        
-        
+        if(inputValues[2] = 0){
+          LeftLight(inputValues[0]);
+          RightLight(inputValues[1]);
+        }
+        else{
+          knightRiderMode = true;
+        }
+       
         //analogWrite(right, inputValues[1]);
 
         Serial.println(inputValues[0], DEC);
@@ -368,16 +393,10 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
 };
 
 
-void intro(){
-  
-}
-
 void setup(){
 
   pixels.begin();
 
-  
-  idlePulsing(true);
   Serial.begin(115200);
   Serial.println("Begin Setup BLE Service and Characteristics");
 
