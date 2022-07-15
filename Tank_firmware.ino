@@ -60,14 +60,30 @@ void ledblink(){
   
 }
 
+void pulsing(){
+  for(int i = 0; i < 50; i++){
+    for(int j = 0; j < 16; j++){
+      pixels.setPixelColor(j, i*2, i*2, i*2);
+    }
+    pixels.show();
+    delay(20);
+  }
+  for(int k = 0; k < 50; k++){
+    for(int l = 0; l < 16; l++){
+      pixels.setPixelColor(l, 100 - k*2, 100 - k*2, 100 - k*2);
+    }
+    pixels.show();
+    delay(20);
+  }
+}
+
 void idlePulsing(bool idleMode){
    if (!idleMode){
     delay(700);
-    digitalWrite(statusLightPin, LOW);
-  
+    return;
   }
   else{
-    ledblink();
+    pulsing();
   }
 }
 
