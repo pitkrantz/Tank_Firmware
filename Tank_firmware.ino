@@ -40,9 +40,13 @@ int lightPin = 21;
 
 bool idleMode = true;
 
-int oldLedL = 0;
-int oldLedR = 0;
+int state = 0;
 
+//State: 0 -> Searching..., 1 -> Normal Mode, 2 -> Stealth Mode, 3 -> KnightRider
+
+
+uint8_t leftLed = 0x7F;
+uint8_t rightLed = 0x7F;
 
 //uint8_t Values[4] = {0x7F, 0x7F, 0x00, 0x00};
 
@@ -87,130 +91,7 @@ void idlePulsing(bool idleMode){
   }
 }
 
-void Task2code( void * pvParameters ){
-  Serial.print("Task2 running on core ");
-  Serial.println(xPortGetCoreID());
-
-  for(;;){
-    if(!idleMode) {
-      analogWrite(statusLightPin, 0);
-    }
-    else{
-      for(byte i = 0; i < 0xFF; i++){
-        analogWrite(statusLightPin, i);
-        delay(5);
-      }
-    }
-  }
-}
-
-
-
-/*
-    if (!idleMode){
-    delay(700);
-    digitalWrite(statusLightPin, LOW);
-  
-  }
-  else{
-    //digitalWrite(statusLightPin, HIGH);
-    //ledblink();
-    while (true){
-      for(int i = 0; i < 255; i + 10){
-      analogWrite(statusLightPin, 128);
-      delay(100);
-      }
-      analogWrite(statusLightPin, 0);
-      delay(100);
-    }
-  }
- */
-
-class ServerCallbacks: public BLEServerCallbacks{
-  void onConnect(BLEServer* pServer) {
-      Serial.println("BLE Client Connected");
-      //idlePulsing(false);
-      idleMode = false;
-  }
-
-  void onDisconnect(BLEServer* pServer) {
-    BLEDevice::startAdvertising();
-    Serial.println("BLE Client Disconnected");
-    //idlePulsing(true);
-    idleMode = true;
-    digitalWrite(lightPin, LOW);
-    
-  }
-};
-
-class InputReceivedCallbacks: public BLECharacteristicCallbacks {
-  
-    void leftMotor(uint8_t input){
-      if (input >= 0x7F){
-        digitalWrite(leftpos, HIGH);
-        digitalWrite(leftneg, LOW);
-
-        int newvalue = (input - 127) *2;
-        analogWrite(left, newvalue); 
-      }
-      if(input < 0x7F){
-        digitalWrite(leftpos, LOW);
-        digitalWrite(leftneg, HIGH);
-
-        int newvalue = (input -127) * (-2);
-
-        analogWrite(left, newvalue);
-      }
-    }
-
-    void rightMotor(uint8_t input){
-      if (input >= 0x7F){
-        digitalWrite(rightpos, HIGH);
-        digitalWrite(rightneg, LOW);
-
-        int newvalue = (input - 127) *2;
-        analogWrite(right, newvalue); 
-      }
-      else{
-        digitalWrite(rightpos, LOW);
-        digitalWrite(rightneg, HIGH);
-
-        int newvalue = (input -127) * (-2);
-
-        analogWrite(right, newvalue);
-      }
-    }
-
-    void horn(uint8_t input){
-      if(input > 0x00){
-        analogWrite(buzzerpin, 150);
-      }
-      else{
-        analogWrite(buzzerpin, LOW);
-      }
-    }
-
-    void light(uint8_t input){
-      if(input > 0x00) {
-        analogWrite(lightPin, HIGH);
-      }
-      else {
-        analogWrite(lightPin, LOW);
-      }
-    }
-
-
-
-        //int numberOfLights = int(newValueL * 0,03);
-        //for(int i = 0; i < numberOfLights; i++){
-          //pixel.color(i, green)
-        //}
-
-    //optimisation einfach en domain vun 0-255/8 etc fir net emmer mussen ze rechnen
-    // 0-31, 32-63, 64 - 95, 96-127, 128-159, 160-191, 192-223, 224-255
-
-
-    int getLedNumber(int value){
+int getLedNumber(int value){
       if(0<= value && value < 16){
         Serial.println("8");
         return 8;
@@ -321,8 +202,7 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
           pixels.setPixelColor(i, 0, 0, 0);
         }
       }
-    
-      //pixels.show();
+      pixels.show();
     }
 
     void RightLight(uint8_t inputR){
@@ -349,8 +229,152 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
         }
       }
     
-      //pixels.show();
-    }  
+      pixels.show();
+    }
+
+void Task2code( void * pvParameters ){
+  Serial.print("Task2 running on core ");
+  Serial.println(xPortGetCoreID());
+
+  for(;;){
+    switch(state){
+      case 0:
+        //Searching...
+        pulsing();
+        break;
+        
+      case 1:
+        //Normal Mode
+        LeftLight(leftLed);
+        RightLight(rightLed);
+        delay(25);
+        break;
+        
+      case 2:
+        //Stealth Mode
+        break;
+        
+      case 3:
+        //Knight Rider
+        break;
+
+      default:
+        Serial.println("Error");
+
+        break;
+    }
+  }
+}
+
+
+
+/*
+    if (!idleMode){
+    delay(700);
+    digitalWrite(statusLightPin, LOW);
+  
+  }
+  else{
+    //digitalWrite(statusLightPin, HIGH);
+    //ledblink();
+    while (true){
+      for(int i = 0; i < 255; i + 10){
+      analogWrite(statusLightPin, 128);
+      delay(100);
+      }
+      analogWrite(statusLightPin, 0);
+      delay(100);
+    }
+  }
+ */
+
+class ServerCallbacks: public BLEServerCallbacks{
+  void onConnect(BLEServer* pServer) {
+      Serial.println("BLE Client Connected");
+      //idlePulsing(false);
+      //idleMode = false;
+      state = 1;
+  }
+
+  void onDisconnect(BLEServer* pServer) {
+    BLEDevice::startAdvertising();
+    Serial.println("BLE Client Disconnected");
+    //idlePulsing(true);
+    //idleMode = true;
+    state = 0;
+    digitalWrite(lightPin, LOW);
+    
+  }
+};
+
+class InputReceivedCallbacks: public BLECharacteristicCallbacks {
+  
+    void leftMotor(uint8_t input){
+      if (input >= 0x7F){
+        digitalWrite(leftpos, HIGH);
+        digitalWrite(leftneg, LOW);
+
+        int newvalue = (input - 127) *2;
+        analogWrite(left, newvalue); 
+      }
+      if(input < 0x7F){
+        digitalWrite(leftpos, LOW);
+        digitalWrite(leftneg, HIGH);
+
+        int newvalue = (input -127) * (-2);
+
+        analogWrite(left, newvalue);
+      }
+    }
+
+    void rightMotor(uint8_t input){
+      if (input >= 0x7F){
+        digitalWrite(rightpos, HIGH);
+        digitalWrite(rightneg, LOW);
+
+        int newvalue = (input - 127) *2;
+        analogWrite(right, newvalue); 
+      }
+      else{
+        digitalWrite(rightpos, LOW);
+        digitalWrite(rightneg, HIGH);
+
+        int newvalue = (input -127) * (-2);
+
+        analogWrite(right, newvalue);
+      }
+    }
+
+    void horn(uint8_t input){
+      if(input > 0x00){
+        analogWrite(buzzerpin, 150);
+      }
+      else{
+        analogWrite(buzzerpin, LOW);
+      }
+    }
+
+    void light(uint8_t input){
+      if(input > 0x00) {
+        analogWrite(lightPin, HIGH);
+      }
+      else {
+        analogWrite(lightPin, LOW);
+      }
+    }
+
+
+
+        //int numberOfLights = int(newValueL * 0,03);
+        //for(int i = 0; i < numberOfLights; i++){
+          //pixel.color(i, green)
+        //}
+
+    //optimisation einfach en domain vun 0-255/8 etc fir net emmer mussen ze rechnen
+    // 0-31, 32-63, 64 - 95, 96-127, 128-159, 160-191, 192-223, 224-255
+
+
+    
 
     
     void onWrite(BLECharacteristic *pCharWriteState) {
@@ -362,27 +386,20 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
         
         leftMotor(inputValues[0]);
         rightMotor(inputValues[1]);
+
+        leftLed = inputValues[0];
+        rightLed = inputValues[1];
+
         
         horn(inputValues[2]);
 
         //light(inputValues[3]);
 
-        int currentLedL = getLedNumber(inputValues[0]);
-        int currentLedR = getLedNumber(inputValues[1]);
-
-        if(oldLedL != currentLedL){
-          LeftLight(inputValues[0]);
-        }
-  
-        if(oldLedR != currentLedR){
-           RightLight(inputValues[1]);
-        }
+        
 
         pixels.show();
         
-        oldLedL = currentLedL;
-        oldLedR = currentLedR;
-        
+       
         //analogWrite(right, inputValues[1]);
 
         Serial.println(inputValues[0], DEC);
