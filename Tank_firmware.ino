@@ -24,13 +24,15 @@ Adafruit_NeoPixel pixels = Adafruit_NeoPixel(N_LEDS, LEDPIN, NEO_GRB + NEO_KHZ80
 
 TaskHandle_t Task2;
 
-int left = 16;
+int left = 17;
 int leftpos = 18;
 int leftneg = 19;
 
-int right = 17;
+int right = 16;
 int rightpos = 2;
 int rightneg = 4;
+
+const int lightsensor = 34;
 
 int buzzerpin = 15;
 
@@ -42,6 +44,8 @@ bool idleMode = true;
 
 int state = 0;
 
+int light;
+
 //State: 0 -> Searching..., 1 -> Normal Mode, 2 -> Stealth Mode, 3 -> KnightRider
 
 
@@ -49,20 +53,11 @@ uint8_t leftLed = 0x7F;
 uint8_t rightLed = 0x7F;
 
 //uint8_t Values[4] = {0x7F, 0x7F, 0x00, 0x00};
+// input[0] -> motor left, input[1] -> motor right, input[2] -> Stealth, input[3] -> knightRider
 
 static uint8_t outputData[1];
 
 BLECharacteristic *pOutputChar;
-
-void ledblink(){
-  for(byte i = 0; i < 0xFF; i++){
-    analogWrite(statusLightPin, i);
-    delay(5);
-  }
-  analogWrite(statusLightPin, 0);
-  delay(100);
-  
-}
 
 void pulsing(){
   for(int i = 0; i < 50; i++){
@@ -79,159 +74,166 @@ void pulsing(){
     pixels.show();
     delay(20);
   }
+  pixels.clear();
 }
 
-void idlePulsing(bool idleMode){
-   if (!idleMode){
-    delay(700);
-    return;
-  }
-  else{
-    pulsing();
-  }
+
+void knightRider(){
+  for(int i = 7; i < 13; i++){
+        pixels.setPixelColor(i, 20, 0, 0);
+        pixels.setPixelColor(i-2, 0, 0, 0);
+        pixels.show();
+        delay(80);
+      }
+      
+      for(int i = 0; i < 6; i++){
+        pixels.setPixelColor(12-i, 0, 0, 0);
+        pixels.setPixelColor(12-i-2, 20, 0, 0);
+        pixels.show();
+        delay(80);
+      }    
 }
 
 int getLedNumber(int value){
       if(0<= value && value < 16){
-        Serial.println("8");
+        //Serial.println("8");
         return 8;
       }
       
       if(16<= value && value < 32){
-        Serial.println("7");
+        //Serial.println("7");
         return 7;
       }
       
       if(32<= value && value < 48){
-        Serial.println("6");
+        //Serial.println("6");
         return 6;
       }
       
       if(48<= value && value < 64){
-        Serial.println("5");
+        //Serial.println("5");
         return 5;
       }
       
       if(64<= value && value < 80){
-        Serial.println("4");
+        //Serial.println("4");
         return 4;
       }
       
       if(80<= value && value < 96){
-        Serial.println("3");
+        //Serial.println("3");
         return 3;
       }
 
       if(96<= value && value < 112){
-        Serial.println("2");
+        //Serial.println("2");
         return 2;
       }
 
       if(112<= value && value < 127){
-        Serial.println("1");
+        //Serial.println("1");
         return 1;
       }
 
       if(value == 127){
-        Serial.println("zerro");
+        //Serial.println("zerro");
         return 0;
       }
 
       if(127< value && value < 144){
-        Serial.println("1");
+        //Serial.println("1");
         return 1;
       }
 
       if(144<= value && value < 160){
-        Serial.println("2");
+        //Serial.println("2");
         return 2;
       }
 
       if(160<= value && value < 176){
-        Serial.println("3");
+        //Serial.println("3");
         return 3;
       }
 
       if(176<= value && value < 192){
-        Serial.println("4");
+        //Serial.println("4");
         return 4;
       }
 
       if(192<= value && value < 208){
-        Serial.println("5");
+        //Serial.println("5");
         return 5;
       }
 
       if(208<= value && value < 224){
-        Serial.println("6");
+        //Serial.println("6");
         return 6;
       }
 
       if(224<= value && value < 240){
-        Serial.println("7");
+        //Serial.println("7");
         return 7;
       }
 
       if(240<= value && value <= 255){
-        Serial.println("8");
+        //Serial.println("8");
         return 8;
       }
     }
 
-    void LeftLight(uint8_t inputL){
+    void LeftLight(uint8_t inputL, int brightness){
       int numLeds = getLedNumber(inputL);
       if (numLeds == 0){
         for(int i = 0; i < 8; i++){
-          pixels.setPixelColor(i, 0, 0, 0);
+          pixels.setPixelColor(i + 1, 0, 0, 0);
         }
       }
       if (inputL > 127){
         for(int i = 0; i < numLeds; i++){
-          pixels.setPixelColor(i, 0, 10, 0);
+          pixels.setPixelColor(i + 1, 0, brightness, 0);
         }
         for(int i = numLeds + 1; i < 8; i++){
-          pixels.setPixelColor(i, 0, 0, 0);
+          pixels.setPixelColor(i + 1, 0, 0, 0);
         }
         
       }
       if (inputL < 127) {
         for(int i = 8 - numLeds; i < 8; i++){
-          pixels.setPixelColor(i, 10, 0, 0);
+          pixels.setPixelColor(i + 1, brightness, 0, 0);
         }
         for(int i = 0; i < 8 - numLeds; i++){
-          pixels.setPixelColor(i, 0, 0, 0);
+          pixels.setPixelColor(i + 1, 0, 0, 0);
         }
       }
       pixels.show();
     }
 
-    void RightLight(uint8_t inputR){
+    void RightLight(uint8_t inputR, int brightness){
       int numLeds = getLedNumber(inputR);
       if (numLeds == 0){
         for(int i = 8; i < 16; i++){
-          pixels.setPixelColor(i, 0, 0, 0);
+          pixels.setPixelColor(i+1, 0, 0, 0);
         }
       }
       if (inputR > 127){
         for(int i = 16 - numLeds; i < 16; i++){
-          pixels.setPixelColor(i, 0, 10, 0);
+          pixels.setPixelColor(i+1, 0, brightness, 0);
         }
         for(int i = 8; i < 16 - numLeds; i++){
-          pixels.setPixelColor(i, 0, 0, 0);
+          pixels.setPixelColor(i+1, 0, 0, 0);
         }
       }
       if (inputR < 127) {
         for(int i = 8; i < 8 + numLeds; i++){
-          pixels.setPixelColor(i, 10, 0, 0);
+          pixels.setPixelColor(i+1, brightness, 0, 0);
         }
         for(int i = 8 + numLeds; i < 16; i++){
-          pixels.setPixelColor(i, 0, 0, 0);
+          pixels.setPixelColor(i+1, 0, 0, 0);
         }
-      }
-    
+      
       pixels.show();
     }
-
+}
 void Task2code( void * pvParameters ){
   Serial.print("Task2 running on core ");
   Serial.println(xPortGetCoreID());
@@ -245,17 +247,31 @@ void Task2code( void * pvParameters ){
         
       case 1:
         //Normal Mode
-        LeftLight(leftLed);
-        RightLight(rightLed);
+        //light = analogRead(lightsensor);
+        //Serial.println(light);
+//        if (light < 2200){
+//          LeftLight(leftLed, 50);
+//          RightLight(rightLed, 50);
+//        }
+//        else{
+//          LeftLight(leftLed, 150);
+//          RightLight(rightLed, 150);
+//        }
+
+        LeftLight(leftLed, 50);
+        RightLight(rightLed, 50);
+        
         delay(25);
         break;
         
       case 2:
         //Stealth Mode
+        pixels.clear();
         break;
         
       case 3:
         //Knight Rider
+        knightRider();
         break;
 
       default:
@@ -302,8 +318,6 @@ class ServerCallbacks: public BLEServerCallbacks{
     //idlePulsing(true);
     //idleMode = true;
     state = 0;
-    digitalWrite(lightPin, LOW);
-    
   }
 };
 
@@ -390,6 +404,16 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
         leftLed = inputValues[0];
         rightLed = inputValues[1];
 
+        if(inputValues[2] > 0){
+          state = 2;
+          pixels.clear();
+        }
+        else if(inputValues[3] > 0){
+          state = 3;
+        }
+        else{
+          state = 1;
+        }
         
         horn(inputValues[2]);
 
@@ -424,8 +448,7 @@ void setup(){
 
   pixels.begin();
 
-  
-  idlePulsing(true);
+  pinMode(lightsensor, INPUT);
   Serial.begin(115200);
   Serial.println("Begin Setup BLE Service and Characteristics");
 
